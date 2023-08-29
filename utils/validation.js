@@ -15,9 +15,14 @@ const validateAlphanumericPassword = (password) => {
   return /^[a-zA-Z0-9]+$/.test(password);
 };
 
+const validateLoginFields = (username, password) => {
+  return username && password;
+};
+
 module.exports = {
   validateRole,
   validateUsernamePassword,
   validatePasswordLength,
   validateAlphanumericPassword,
+  validateLoginFields
 };

@@ -1,11 +1,15 @@
 const db = require("../db");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const {
   validateRole,
   validateUsernamePassword,
   validatePasswordLength,
   validateAlphanumericPassword,
+  validateLoginFields,
 } = require("../utils/validation");
+
+const SECRET_KEY = "your-secret-key";
 
 const createUser = (req, res) => {
   const { username, password, role } = req.body;
@@ -68,6 +72,51 @@ const createUser = (req, res) => {
   });
 };
 
+const loginUser = (req, res) => {
+  const { username, password } = req.body;
+
+  const validationErrors = [];
+
+  if (!validateLoginFields(username, password)) {
+    validationErrors.push("Username and password are required.");
+  }
+
+  if (validationErrors.length > 0) {
+    return res.status(400).json({ errors: validationErrors });
+  }
+
+  const getUserQuery = "SELECT * FROM users WHERE username = ?";
+  db.query(getUserQuery, [username], (err, results) => {
+    if (err) {
+      console.error("Error fetching user:", err);
+      return res.status(500).json({ error: "Error fetching user." });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({ error: "Invalid username or password." });
+    }
+
+    const user = results[0];
+    bcrypt.compare(password, user.password, (err, result) => {
+      if (err || !result) {
+        return res.status(401).json({ error: "Invalid username or password." });
+      }
+
+      const payload = {
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+      };
+
+      const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
+
+      return res
+        .status(200)
+        .json({ message: "Login successful", token: token });
+    });
+  });
+};
+
 const getAllUsers = (req, res) => {
   const query = "SELECT * FROM users";
 
@@ -82,5 +131,6 @@ const getAllUsers = (req, res) => {
 
 module.exports = {
   createUser,
+  loginUser,
   getAllUsers,
 };
