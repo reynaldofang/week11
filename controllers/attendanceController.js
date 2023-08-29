@@ -1,6 +1,9 @@
 const db = require("../db");
-const { checkMakerOrApprover } = require("../middlewares/authMiddleware");
-const { validateAttendanceFields } = require("../utils/validation");
+const {
+  validateAttendanceFields,
+  validateAttendanceStatus,
+} = require("../utils/validation");
+const moment = require("moment-timezone");
 
 const markAttendance = (req, res) => {
   const { description } = req.body;
@@ -56,8 +59,43 @@ const getAllAttendance = (req, res) => {
   });
 };
 
+const updateAttendanceStatus = (req, res) => {
+  const { status } = req.body;
+  const { id } = req.params;
+  const coachId = req.decodedToken.userId;
+  const formattedUpdateDate = moment()
+    .tz("Asia/Jakarta")
+    .format("YYYY-MM-DD HH:mm:ss");
+
+  if (!validateAttendanceStatus(status)) {
+    return res.status(400).json({ error: "Invalid status." });
+  }
+
+  const updateQuery =
+    "UPDATE attendance SET status = ?, coach_id = ?, updated_at = ? WHERE id = ?";
+  db.query(
+    updateQuery,
+    [status, coachId, formattedUpdateDate, id],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating attendance status:", err);
+        return res
+          .status(500)
+          .json({ error: "Error updating attendance status." });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Attendance not found." });
+      }
+
+      return res.status(200).json({ message: "Attendance status updated." });
+    }
+  );
+};
+
 module.exports = {
   markAttendance,
   getStudentAttendance,
   getAllAttendance,
+  updateAttendanceStatus,
 };

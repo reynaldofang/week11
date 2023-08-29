@@ -26,6 +26,11 @@ const validateAttendanceFields = (description) => {
   return true;
 };
 
+const validateAttendanceStatus = (status) => {
+  const allowedStatuses = ["present", "pending", "absent", "sick"];
+  return allowedStatuses.includes(status);
+};
+
 module.exports = {
   validateRole,
   validateUsernamePassword,
@@ -33,4 +38,5 @@ module.exports = {
   validateAlphanumericPassword,
   validateLoginFields,
   validateAttendanceFields,
+  validateAttendanceStatus,
 };
