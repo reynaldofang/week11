@@ -1,6 +1,6 @@
 const db = require("../db");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const { generateToken } = require("../utils/jwtUtils");
 const {
   validateRole,
   validateUsernamePassword,
@@ -9,8 +9,6 @@ const {
   validateLoginFields,
 } = require("../utils/validation");
 
-const SECRET_KEY = "your-secret-key";
-
 const createUser = (req, res) => {
   const { username, password, role } = req.body;
 
@@ -18,7 +16,7 @@ const createUser = (req, res) => {
 
   if (!validateRole(role)) {
     validationErrors.push(
-      "Invalid role. Allowed roles are maker and approver."
+      "Invalid role. Allowed roles are student, coach, and admin."
     );
   }
 
@@ -56,7 +54,6 @@ const createUser = (req, res) => {
         return res.status(500).json({ error: "Error hashing password." });
       }
 
-      // Insert the user into the database
       const insertQuery =
         "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
       db.query(insertQuery, [username, hashedPassword, role], (err, result) => {
@@ -102,17 +99,12 @@ const loginUser = (req, res) => {
         return res.status(401).json({ error: "Invalid username or password." });
       }
 
-      const payload = {
-        userId: user.id,
-        username: user.username,
-        role: user.role,
-      };
+      const token = generateToken(user.id, user.username, user.role); // Use the generateToken function
 
-      const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
-
-      return res
-        .status(200)
-        .json({ message: "Login successful", token: token });
+      return res.status(200).json({
+        message: "Login successful.",
+        token: token,
+      });
     });
   });
 };

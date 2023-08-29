@@ -1,5 +1,5 @@
 const validateRole = (role) => {
-  const validRoles = ["maker", "approver"];
+  const validRoles = ["student", "coach"];
   return validRoles.includes(role);
 };
 
@@ -19,10 +19,18 @@ const validateLoginFields = (username, password) => {
   return username && password;
 };
 
+const validateAttendanceFields = (description) => {
+  if (!description || description.trim() === "") {
+    return false;
+  }
+  return true;
+};
+
 module.exports = {
   validateRole,
   validateUsernamePassword,
   validatePasswordLength,
   validateAlphanumericPassword,
-  validateLoginFields
+  validateLoginFields,
+  validateAttendanceFields,
 };
