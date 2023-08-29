@@ -121,8 +121,21 @@ const getAllUsers = (req, res) => {
   });
 };
 
+const getAllStudents = (req, res) => {
+  const query = "SELECT * FROM users WHERE role = 'student'";
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching students:", err);
+      return res.status(500).json({ error: "Error fetching students." });
+    }
+    return res.status(200).json({ students: result });
+  });
+};
+
 module.exports = {
   createUser,
   loginUser,
   getAllUsers,
+  getAllStudents,
 };

@@ -1,5 +1,5 @@
 const validateRole = (role) => {
-  const validRoles = ["student", "coach"];
+  const validRoles = ["student", "coach", "admin"];
   return validRoles.includes(role);
 };
 

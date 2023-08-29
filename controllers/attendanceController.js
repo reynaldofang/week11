@@ -6,29 +6,48 @@ const {
 const moment = require("moment-timezone");
 
 const markAttendance = (req, res) => {
-  const { description } = req.body;
-
-  const validationErrors = [];
+  const userId = req.decodedToken.userId;
+  const description = req.body.description;
+  const currentDate = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
 
   if (!validateAttendanceFields(description)) {
-    validationErrors.push("Description is required.");
+    return res
+      .status(400)
+      .json({ error: "Attendance description cannot be empty." });
   }
-
-  if (validationErrors.length > 0) {
-    return res.status(400).json({ errors: validationErrors });
-  }
-
-  const userId = req.decodedToken.userId;
-
-  const query =
-    "INSERT INTO attendance (user_id, status, description) VALUES (?, ?, ?)";
-  db.query(query, [userId, "pending", description], (err, result) => {
+  const checkAttendanceQuery =
+    "SELECT * FROM attendance WHERE user_id = ? AND DATE(created_at) = ?";
+  db.query(checkAttendanceQuery, [userId, currentDate], (err, result) => {
     if (err) {
-      console.error("Error marking attendance:", err);
-      return res.status(500).json({ error: "Error marking attendance." });
+      console.error("Error checking attendance:", err);
+      return res.status(500).json({ error: "Error checking attendance." });
     }
-    console.log();
-    return res.status(200).json({ message: "Attendance marked as pending." });
+
+    if (result.length > 0) {
+      return res
+        .status(200)
+        .json({ status: "You have already attended today." });
+    }
+
+    const insertAttendanceQuery =
+      "INSERT INTO attendance (user_id, description, created_at) VALUES (?, ?, ?)";
+    db.query(
+      insertAttendanceQuery,
+      [
+        userId,
+        description,
+        moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss"),
+      ],
+      (err, result) => {
+        if (err) {
+          console.error("Error marking attendance:", err);
+          return res.status(500).json({ error: "Error marking attendance." });
+        }
+        return res
+          .status(200)
+          .json({ message: "Attendance marked successfully." });
+      }
+    );
   });
 };
 
@@ -93,9 +112,30 @@ const updateAttendanceStatus = (req, res) => {
   );
 };
 
+const getAttendanceStatus = (req, res) => {
+  const userId = req.decodedToken.userId;
+  const query = "SELECT * FROM attendance WHERE user_id = ?";
+  db.query(query, [userId], (err, result) => {
+    if (err) {
+      console.error("Error fetching attendance status:", err);
+      return res
+        .status(500)
+        .json({ error: "Error fetching attendance status." });
+    }
+
+    if (result.length === 0) {
+      return res.status(s404).json({ error: "Attendance status not found." });
+    }
+
+    const attendanceStatus = result[0].status;
+    return res.status(200).json({ status: attendanceStatus });
+  });
+};
+
 module.exports = {
   markAttendance,
   getStudentAttendance,
   getAllAttendance,
   updateAttendanceStatus,
+  getAttendanceStatus,
 };

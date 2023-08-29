@@ -29,4 +29,10 @@ router.put(
   attendanceController.updateAttendanceStatus
 );
 
+router.get(
+  "/status",
+  authorizationMiddleware({ roles: ["student"] }),
+  attendanceController.getAttendanceStatus
+);
+
 module.exports = router;
