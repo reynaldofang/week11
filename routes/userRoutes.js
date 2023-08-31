@@ -17,4 +17,10 @@ router.get(
   userController.getAllStudents
 );
 
+router.delete(
+  "/delete-user/:userId",
+  authorizationMiddleware({ roles: ["admin"] }),
+  userController.deleteUser
+);
+
 module.exports = router;

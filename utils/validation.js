@@ -31,6 +31,15 @@ const validateAttendanceStatus = (status) => {
   return allowedStatuses.includes(status);
 };
 
+const validateDeleteUser = (adminUserId, userRole) => {
+  if (userRole === "student" || userRole === "coach") {
+    if (adminUserId !== adminUserId) {
+      return false;
+    }
+  }
+  return true;
+};
+
 module.exports = {
   validateRole,
   validateUsernamePassword,
@@ -39,4 +48,5 @@ module.exports = {
   validateLoginFields,
   validateAttendanceFields,
   validateAttendanceStatus,
+  validateDeleteUser,
 };

@@ -7,6 +7,7 @@ const {
   validatePasswordLength,
   validateAlphanumericPassword,
   validateLoginFields,
+  validateDeleteUser,
 } = require("../utils/validation");
 
 const createUser = (req, res) => {
@@ -133,9 +134,39 @@ const getAllStudents = (req, res) => {
   });
 };
 
+const deleteUser = (req, res) => {
+  const { userId } = req.params;
+  const adminUserId = req.decodedToken.userId;
+
+  const getRoleQuery = "SELECT role FROM users WHERE id = ?";
+  db.query(getRoleQuery, [userId], (err, result) => {
+    if (err) {
+      console.error("Error fetching user role:", err);
+      return res.status(500).json({ error: "Error fetching user role." });
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+    const userRole = result[0].role;
+    if (!validateDeleteUser(adminUserId, userRole)) {
+      return res.status(403).json({ error: "Permission denied." });
+    }
+    const deleteQuery = "DELETE FROM users WHERE id = ?";
+    db.query(deleteQuery, [userId], (err, result) => {
+      if (err) {
+        console.error("Error deleting user:", err);
+        return res.status(500).json({ error: "Error deleting user." });
+      }
+      console.log("User deleted with ID:", userId);
+      return res.status(200).json({ message: "User deleted successfully." });
+    });
+  });
+};
+
 module.exports = {
   createUser,
   loginUser,
   getAllUsers,
   getAllStudents,
+  deleteUser,
 };
