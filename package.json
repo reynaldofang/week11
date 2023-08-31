@@ -19,6 +19,7 @@
     "jsonwebtoken": "^9.0.1",
     "moment-timezone": "^0.5.43",
     "mysql2": "^3.6.0",
+    "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
