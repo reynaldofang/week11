@@ -1,0 +1,162 @@
+openapi: 3.0.0
+info:
+  title: Milestone 2 - Attendance Stundent
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Local Server
+  - url : https://week11-reynaldofang.cyclic.app
+    description: Cyclic server
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+paths:
+  /register:
+    post:
+      tags:
+        - default
+      summary: create users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                username: reynaldo
+                password: reynaldo88
+                role: student
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /login:
+    post:
+      tags:
+        - default
+      summary: login users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                username: reynaldo
+                password: reynaldo88
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /all-users:
+    get:
+      tags:
+        - default
+      summary: all users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /all-students:
+    get:
+      tags:
+        - default
+      summary: List All Students
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /attendance/checkin:
+    post:
+      tags:
+        - default
+      summary: post new attedance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                description: hadir
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /attendance/my-attendance:
+    get:
+      tags:
+        - default
+      summary: get data attendance by student
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /attendance/all-attendance:
+    get:
+      tags:
+        - default
+      summary: get data all student attendance
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /attendance/update-attendance-status/2:
+    put:
+      tags:
+        - default
+      summary: update status attendance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                status: present
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /delete-user/6:
+    delete:
+      tags:
+        - default
+      summary: delete user by admin
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /attendance/status:
+    get:
+      tags:
+        - default
+      summary: check status attendance student
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

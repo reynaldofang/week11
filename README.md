@@ -71,7 +71,7 @@ CREATE TABLE attendance (
 
 I have deploy my API in public so you can try it:
 
-[Trying API With Swagger](https://week11-reynaldofang.cyclic.cloud/api-docs)
+[Trying API With Swagger](https://week11-reynaldofang.cyclic.app/api-docs)
 
 
 For account you can try this 3 roles:
