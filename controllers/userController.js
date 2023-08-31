@@ -151,14 +151,31 @@ const deleteUser = (req, res) => {
     if (!validateDeleteUser(adminUserId, userRole)) {
       return res.status(403).json({ error: "Permission denied." });
     }
-    const deleteQuery = "DELETE FROM users WHERE id = ?";
-    db.query(deleteQuery, [userId], (err, result) => {
+
+    // Delete attendance records for the user
+    const deleteAttendanceQuery = `
+      DELETE FROM attendance
+      WHERE user_id = ?
+    `;
+    db.query(deleteAttendanceQuery, [userId], (err, result) => {
       if (err) {
-        console.error("Error deleting user:", err);
-        return res.status(500).json({ error: "Error deleting user." });
+        console.error("Error deleting attendance records:", err);
+        return res
+          .status(500)
+          .json({ error: "Error deleting attendance records." });
       }
-      console.log("User deleted with ID:", userId);
-      return res.status(200).json({ message: "User deleted successfully." });
+
+      // Delete user
+      const deleteUserQuery = "DELETE FROM users WHERE id = ?";
+      db.query(deleteUserQuery, [userId], (err, result) => {
+        if (err) {
+          console.error("Error deleting user:", err);
+          return res.status(500).json({ error: "Error deleting user." });
+        }
+
+        console.log("User deleted with ID:", userId);
+        return res.status(200).json({ message: "User deleted successfully." });
+      });
     });
   });
 };
