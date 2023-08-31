@@ -90,26 +90,47 @@ const updateAttendanceStatus = (req, res) => {
     return res.status(400).json({ error: "Invalid status." });
   }
 
-  const updateQuery =
-    "UPDATE attendance SET status = ?, coach_id = ?, updated_at = ? WHERE id = ?";
-  db.query(
-    updateQuery,
-    [status, coachId, formattedUpdateDate, id],
-    (err, result) => {
-      if (err) {
-        console.error("Error updating attendance status:", err);
-        return res
-          .status(500)
-          .json({ error: "Error updating attendance status." });
-      }
-
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ error: "Attendance not found." });
-      }
-
-      return res.status(200).json({ message: "Attendance status updated." });
+  const getAttendanceStatusQuery = "SELECT status FROM attendance WHERE id = ?";
+  db.query(getAttendanceStatusQuery, [id], (err, result) => {
+    if (err) {
+      console.error("Error fetching attendance status:", err);
+      return res
+        .status(500)
+        .json({ error: "Error fetching attendance status." });
     }
-  );
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Attendance not found." });
+    }
+
+    const currentStatus = result[0].status;
+    if (currentStatus !== "pending") {
+      return res
+        .status(200)
+        .json({ message: "Only pending attendance can be updated." });
+    }
+
+    const updateQuery =
+      "UPDATE attendance SET status = ?, coach_id = ?, updated_at = ? WHERE id = ?";
+    db.query(
+      updateQuery,
+      [status, coachId, formattedUpdateDate, id],
+      (err, result) => {
+        if (err) {
+          console.error("Error updating attendance status:", err);
+          return res
+            .status(500)
+            .json({ error: "Error updating attendance status." });
+        }
+
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ error: "Attendance not found." });
+        }
+
+        return res.status(200).json({ message: "Attendance status updated." });
+      }
+    );
+  });
 };
 
 const getAttendanceStatus = (req, res) => {
